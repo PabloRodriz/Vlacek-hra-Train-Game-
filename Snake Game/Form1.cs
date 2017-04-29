@@ -25,6 +25,7 @@ namespace Snake_Game
             InitializeComponent();
         }
 
+        // event PaintEventHandler
         private void startDrawing(object sender, PaintEventArgs e)
         {
             paper = e.Graphics;
@@ -63,8 +64,10 @@ namespace Snake_Game
             }
             if(e.KeyData == Keys.Escape)
             {
+                this.Close();
                 timer1.Stop();
             }
+            
         }
 
         private void timer1_Tick(object sender, EventArgs e)

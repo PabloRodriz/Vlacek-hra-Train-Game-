@@ -18,14 +18,14 @@ namespace Snake_Game
         {
             x = 10; // x coordinate of the start
             y = 10; // x coordinate of the point of start
-            width = 100; // 10 x 10
+            width = 400; // 10 x 10
             
             walls = new Rectangle[4];
             fieldPen = new Pen(System.Drawing.Color.Black, 5);
             walls[0] = new Rectangle(10, 10, 5, width + 15); // left
-            walls[1] = new Rectangle(10, 10, width + 15, 5); // up
-            walls[2] = new Rectangle(width + 22, 10, 5, width + 15); // right
-            walls[3] = new Rectangle(10, width + 22, width + 15, 5); // down
+            walls[1] = new Rectangle(10, 10, 320 + width + 15, 5); // up
+            walls[2] = new Rectangle(width + 22 + 320, 10, 5, width + 15); // right
+            walls[3] = new Rectangle(10, width + 22, 320 + width + 15, 5); // down
             
         }
 
