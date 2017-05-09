@@ -1,4 +1,4 @@
-﻿namespace Snake_Game
+﻿namespace Train_game
 {
     partial class Form1
     {
@@ -42,8 +42,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(758, 436);
+            this.BackColor = System.Drawing.SystemColors.ControlText;
+            this.ClientSize = new System.Drawing.Size(825, 502);
             this.DoubleBuffered = true;
+            this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "Form1";
             this.Text = "Game";

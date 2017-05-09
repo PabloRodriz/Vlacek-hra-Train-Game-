@@ -8,12 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Snake_Game
+namespace Train_game
 {
     public partial class Form1 : Form
     {
+        Random randStone = new Random();
         Graphics paper;
-        Snake snake = new Snake();
+        Train train = new Train();
+        Stone stone;
 
         bool up = false;
         bool down = false;
@@ -23,13 +25,17 @@ namespace Snake_Game
         public Form1()
         {
             InitializeComponent();
+            stone = new Stone(randStone);
         }
 
         // event PaintEventHandler
         private void startDrawing(object sender, PaintEventArgs e)
         {
             paper = e.Graphics;
-            snake.drawSnake(paper);
+            stone.drawStone(paper);
+            train.drawSnake(paper);
+            
+            
         }
 
         private void game_KeyDown(object sender, KeyEventArgs e)
@@ -62,22 +68,64 @@ namespace Snake_Game
                 right = false;
                 left = true;
             }
-            if(e.KeyData == Keys.Escape)
+            if (e.KeyData == Keys.P)
+            {
+                
+                timer1.Stop();
+            }
+            if (e.KeyData == Keys.R)
+            {
+
+                timer1.Start();
+            }
+            if (e.KeyData == Keys.Escape)
             {
                 this.Close();
                 timer1.Stop();
             }
-            
+           
+
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (down) { snake.moveDown(); }
-            if (up) { snake.moveUp(); }
-            if (right) { snake.moveRight(); }
-            if (left) { snake.moveLeft(); }
+            if (down)
+            {
+                if (train.moveDown())
+                {
+                    timer1.Stop();                                        
+                }
+            }
+            if (up)
+            {
+                if (train.moveUp())
+                {
+                    timer1.Stop();
+                }
+            }
+            if (right)
+            {
+                if (train.moveRight())
+                {
+                    timer1.Stop();
+                }
+            }
+            if (left)
+            {
+                if (train.moveLeft())
+                {
+                    timer1.Stop();
+                }
+            }
 
-            
+
+            if (train.TrainRec[0].IntersectsWith(stone.stoneRec))
+            {
+                train.growTrain();
+                stone.stoneLocation(randStone);
+            }
+
+
             this.Invalidate();
         }
         
