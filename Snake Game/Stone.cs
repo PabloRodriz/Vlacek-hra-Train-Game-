@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,13 +17,16 @@ namespace Train_game
         public SolidBrush brush; // ----------
         public Image stoneImage;
 
+        private int stoneMax = 3;
+
         public Stone(Random randStone)
         {
             x = (int)((randStone.Next(1, 19) + 0.25) * 40);
             y = (int)((randStone.Next(1, 11) + 0.25) * 40);
 
             brush = new SolidBrush(Color.Green);
-            stoneImage = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\stone.bmp");
+            stoneImage = Image.FromFile("Images\\stone.bmp");
+            
             width = 40;
             height = 40;
 
@@ -30,6 +35,7 @@ namespace Train_game
 
         public void stoneLocation(Random randStone)
         {
+
             x = (int)((randStone.Next(1, 19) + 0.25) * 40);
             y = (int)((randStone.Next(1, 11) + 0.25) * 40);
         }
@@ -40,6 +46,11 @@ namespace Train_game
             stoneRec.Y = y;
 
             paper.DrawImage(stoneImage, stoneRec);
+        }
+
+        public int StoneMax()
+        {
+            return stoneMax;
         }
 
     }

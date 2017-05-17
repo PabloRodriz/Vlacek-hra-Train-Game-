@@ -16,6 +16,8 @@ namespace Train_game
         bool left = false;
         bool right = false;
 
+        public bool win = false;
+
         int[] orientation; // 0 = left, 1 = up, 2 = right, 3 = down
 
 
@@ -24,12 +26,28 @@ namespace Train_game
 
 
         private SolidBrush brush;
+        private SolidBrush brushWinner;
+        private Font resultFont = new Font("Arial", 12);
+        private Font winnerFont = new Font("Arial", 25);
         private int x, y, width, height;
         private Level level;
+
+        private int stoneMax = Program.maxStones;
+        public int stoneCounter;
+
+        public Image door = Image.FromFile("Images\\door.bmp");
+        public Image doorOpen = Image.FromFile("Images\\opendoor.bmp");
 
         public Rectangle[] TrainRec
         {
             get { return trainRec; }
+        }
+
+        public int StoneMax
+        {
+            get { return stoneMax; }
+            set { stoneMax = value; }
+
         }
 
 
@@ -43,6 +61,7 @@ namespace Train_game
             imageArray = new Image[vagons];
             orientation = new int[vagons];
             brush = new SolidBrush(Color.Blue);
+            brushWinner = new SolidBrush(Color.Red);
             level = new Level();
 
             x = 50; //wall.X(10) + wall.width(5) + 3 + clearance(1)
@@ -70,11 +89,50 @@ namespace Train_game
 
 
         
+        public void drawWin(Graphics paper)
+        {
+            string[] lines = System.IO.File.ReadAllLines("winners.txt");
+            string text;
+            if (Int32.Parse(lines[1]) >= Program.maxStones) // Is >= so the first is remembered
+                // winner still in database
+            {
+                text = "Winner!! But the best is " + lines[0] +  " score: " + lines[1];
+            }else
+            {
+                text = "Winner!! You are the winner: " + Program.playerName + " score: " + Program.maxStones;
+                string[] linesWrite = { Program.playerName, Program.maxStones.ToString() };
+                
+                System.IO.File.WriteAllLines("winners.txt", linesWrite);
+
+            }
+
+            paper.DrawString(text, winnerFont, brushWinner, 80, 200);
+
+        }
+
+        public void drawResult(Graphics paper)
+        {
+            string stones = "Stones left: " + (stoneMax - stoneCounter);
+            paper.DrawString(stones, resultFont, brush, 10, 500);
+            string keyF2 = "F2 restart";
+            Brush green = new SolidBrush(Color.Green);
+            paper.DrawString(keyF2, resultFont, green, 200, 500);
+
+            string keyESC = "ESC finish";
+            Brush orange = new SolidBrush(Color.OrangeRed);
+            paper.DrawString(keyESC, resultFont, orange, 400, 500);
+
+            string player = "Player: " + Program.playerName;
+            Brush gold = new SolidBrush(Color.Gold);
+            paper.DrawString(player, resultFont, gold, 700, 500);
+
+        }
+
 
         // Painting each rectangle inside the snake
         // Painting the field also
         // !!! possile implementation of different eaten items here !!!
-        public void drawSnake(Graphics paper)
+        public void drawTrain(Graphics paper)
         {
             for (int i = 0; i < level.getWallUp().Length; i++)
             {
@@ -85,12 +143,35 @@ namespace Train_game
             for (int i = 0; i < level.getWallLeft().Length; i++)
             {
                 paper.DrawImage(level.getWallsImage(), level.getWallLeft()[i]);
-                paper.DrawImage(level.getWallsImage(), level.getWallRight()[i]);
+                if (i == 4)
+                {
+                    if (stoneCounter == stoneMax)
+                    {
+                        paper.DrawImage(doorOpen, level.getWallRight()[i]);
+                    }else
+                    {
+                        paper.DrawImage(door, level.getWallRight()[i]);
+                    }
+
+                }else
+                {
+                    paper.DrawImage(level.getWallsImage(), level.getWallRight()[i]);
+                }
+               
             }
+            
 
             for (int i = 0; i < trainRec.Length; i++)
             {
-                paper.DrawImage(imageArray[i], trainRec[i]);
+                if(trainRec.Length == 1)
+                {
+                    paper.DrawImage(imageArray[i], trainRec[i]);
+                }
+                else
+                {
+                    paper.DrawImage(imageArray[i], trainRec[i]);
+                }
+               
                
             }
             
@@ -98,7 +179,7 @@ namespace Train_game
 
         }
 
-        public void drawSnake()
+        public void drawTrain()
         {
             /* Starting from the tail of the snake,
              * every position, but the first,
@@ -135,17 +216,24 @@ namespace Train_game
         public bool moveDown()
         {
             bool crash = false;
-            drawSnake();
-            trainRec[0].Y += 40;
-            orientation[0] = 3;
-            imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_down.gif");
             
-            if (trainRec[0].IntersectsWith(level.getWalls()[3]) || hitItSelf(trainRec, trainRec[0]))
+            Rectangle helpRec = trainRec[0];
+            helpRec.Y += 40;
+            
+           // ---- SOLUTION ---
+            
+            if (helpRec.IntersectsWith(level.getWalls()[3]) || hitItSelf(trainRec, helpRec))
             {                
                 imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
-                imageArray[1] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
-                crash = true;         
+                //imageArray[1] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
+                crash = true;
 
+            }else
+            {
+                drawTrain();
+                trainRec[0].Y += 40;
+                orientation[0] = 3;
+                imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_down.gif");
             }
 
             return crash;
@@ -153,33 +241,61 @@ namespace Train_game
         public bool moveUp()
         {
             bool crash = false;
-            drawSnake();
-            trainRec[0].Y -= 40;
-            orientation[0] = 1;
-            imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_up.gif");
-            if (trainRec[0].IntersectsWith(level.getWalls()[1]) || hitItSelf(trainRec, trainRec[0]))
+
+            Rectangle helpRec = trainRec[0];
+            helpRec.Y -= 40;
+
+
+            
+            if (helpRec.IntersectsWith(level.getWalls()[1]) || hitItSelf(trainRec, helpRec))
             {
                 crash = true;
                 imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
-                imageArray[1] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
+                //imageArray[1] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
                 //MessageBox.Show("Collision", "Error", MessageBoxButtons.OKCancel);
 
+            }else
+            {
+                drawTrain();
+                trainRec[0].Y -= 40;
+                orientation[0] = 1;
+                imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_up.gif");
             }
             return crash;
         }
         public bool moveRight()
         {
             bool crash = false;
-            drawSnake();
-            trainRec[0].X += 40;
-            orientation[0] = 2;
-            imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_right.gif");
-            if (trainRec[0].IntersectsWith(level.getWalls()[2]) || hitItSelf(trainRec, trainRec[0]))
+
+            Rectangle helpRec = trainRec[0];
+            helpRec.X += 40;
+
+            
+            if (helpRec.IntersectsWith(level.getWalls()[2]) || hitItSelf(trainRec, helpRec))
             {
-                //MessageBox.Show("Collision", "Error", MessageBoxButtons.OKCancel);
-                imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
-                imageArray[1] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
-                crash = true;
+                if (helpRec.IntersectsWith(level.getWallRight()[4]) && stoneCounter == stoneMax)
+                {
+                    drawTrain();
+                    trainRec[0].X += 40;
+                    orientation[0] = 2;
+                    imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_right.gif");
+                    win = true;
+                }else
+                {
+                    imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
+
+                    crash = true;
+                }
+               
+            }else
+            {
+                
+                drawTrain();
+                trainRec[0].X += 40;
+                orientation[0] = 2;
+                imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_right.gif");
+                
+                
             }
             return crash;
 
@@ -187,17 +303,23 @@ namespace Train_game
         public bool moveLeft()
         {
             bool crash = false;
-            drawSnake();
-            trainRec[0].X -= 40;
-            orientation[0] = 0;
-            imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_left.gif");
-            if (trainRec[0].IntersectsWith(level.getWalls()[0]) || hitItSelf(trainRec, trainRec[0]))
+            Rectangle helpRec = trainRec[0];
+            helpRec.X -= 40;
+
+           
+            if (helpRec.IntersectsWith(level.getWalls()[0]) || hitItSelf(trainRec, helpRec))
             {
-                //MessageBox.Show("Collision", "Error", MessageBoxButtons.OKCancel);
-                imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
-                imageArray[1] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");
+                
+                imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\crash.bmp");                
                 crash = true;
 
+
+            }else
+            {
+                drawTrain();
+                trainRec[0].X -= 40;
+                orientation[0] = 0;
+                imageArray[0] = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\train_left.gif");
             }
             return crash;
         }
@@ -225,6 +347,7 @@ namespace Train_game
             rec.Add(new Rectangle(trainRec[trainRec.Length - 1].X, trainRec[trainRec.Length - 1].Y, width, height));
             trainRec = rec.ToArray();
 
+
             List<Image> imageList = imageArray.ToList();
             imageList.Add(imageArray[imageArray.Length - 1]);
             imageArray = imageList.ToArray();
@@ -232,6 +355,8 @@ namespace Train_game
             List<int> orientationList = orientation.ToList();
             orientationList.Add(orientation[orientation.Length - 1]);
             orientation = orientationList.ToArray();
+
+            stoneCounter++;
         }
 
     }

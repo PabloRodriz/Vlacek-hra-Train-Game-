@@ -14,7 +14,7 @@ namespace Train_game
     {
         Random randStone = new Random();
         Graphics paper;
-        Train train = new Train();
+        public static Train train;
         Stone stone;
 
         bool up = false;
@@ -22,18 +22,41 @@ namespace Train_game
         bool left = false;
         bool right = false;
 
+        public static bool hp = true;
+
         public Form1()
         {
+            init();
             InitializeComponent();
+        }
+
+        public void init()
+        {
+            
             stone = new Stone(randStone);
+            train = new Train();
         }
 
         // event PaintEventHandler
         private void startDrawing(object sender, PaintEventArgs e)
         {
+            
             paper = e.Graphics;
-            stone.drawStone(paper);
-            train.drawSnake(paper);
+            if(train.stoneCounter == train.StoneMax)
+            {
+                if(train.win == true)
+                {
+                    train.drawWin(paper);
+                    timer1.Stop();
+                }
+            }else
+            {
+                
+                stone.drawStone(paper);
+            }
+
+            train.drawResult(paper);
+            train.drawTrain(paper);
             
             
         }
@@ -68,26 +91,26 @@ namespace Train_game
                 right = false;
                 left = true;
             }
-            if (e.KeyData == Keys.P)
+           
+            if (e.KeyData == Keys.F2)
             {
-                
-                timer1.Stop();
-            }
-            if (e.KeyData == Keys.R)
-            {
-
+                init();
                 timer1.Start();
+                Program.gv = true;
+                this.Close();
             }
             if (e.KeyData == Keys.Escape)
             {
+                Program.gv = false;
                 this.Close();
                 timer1.Stop();
+
             }
            
 
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        public void timer1_Tick(object sender, EventArgs e)
         {
             if (down)
             {
@@ -122,13 +145,15 @@ namespace Train_game
             if (train.TrainRec[0].IntersectsWith(stone.stoneRec))
             {
                 train.growTrain();
+                
                 stone.stoneLocation(randStone);
             }
 
 
             this.Invalidate();
+
+          
         }
-        
-        
+
     }
 }

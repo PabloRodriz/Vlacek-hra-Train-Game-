@@ -15,6 +15,7 @@ namespace Train_game
         private Rectangle[] wallDown;
         private Rectangle[] wallLeft;
         private Rectangle[] wallRight;
+        
         private Image wallsImage;
         // 0- left; 1- up; 2- right; 3- down
         private Pen fieldPen;
@@ -31,8 +32,9 @@ namespace Train_game
             wallDown = new Rectangle[20];
             wallLeft = new Rectangle[12];
             wallRight = new Rectangle[12];
+            
 
-            wallsImage = Image.FromFile(@"D:\ERASMUS\ZAZPE\Snake Game\Snake Game\Images\wall.gif");
+            wallsImage = Image.FromFile("Images\\wall.gif");
             fieldPen = new Pen(System.Drawing.Color.Black, 5);
 
             walls[0] = new Rectangle(10, 10, 5, width + 15); // left
@@ -53,6 +55,7 @@ namespace Train_game
             {
                 wallLeft[i] = new Rectangle(x , y, 40, 40);
                 wallRight[i] = new Rectangle(x + 760, y, 40, 40);
+                
                 y += 40;
             }
 
